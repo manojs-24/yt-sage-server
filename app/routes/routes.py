@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas import  SuccessResponse, ErrorResponse, YouTubeAnalysisRequest
-from app.controllers.controller import handle_youtube_analysis
+from app.controllers.controller import handle_youtube_analysis, handle_youtube_analysis2
 from datetime import datetime
 
 router = APIRouter()
@@ -30,3 +30,7 @@ def health_check():
 def analyse_video(payload: YouTubeAnalysisRequest):
     return handle_youtube_analysis(payload)
 
+
+@router.post("/yt-analysis", response_model=SuccessResponse, responses={400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}})
+def analyse_video2(payload: YouTubeAnalysisRequest):
+    return handle_youtube_analysis2(payload)

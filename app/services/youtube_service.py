@@ -1,10 +1,8 @@
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
 from urllib.parse import urlparse, parse_qs
 import google.generativeai as genai  # Corrected import
 import os
-from youtube_transcript_api._errors import (
-    TranscriptsDisabled, NoTranscriptFound, VideoUnavailable, CouldNotRetrieveTranscript
-)
+import requests
 
 
 
@@ -14,6 +12,8 @@ load_dotenv()
 
 
 API_KEY = os.getenv("GEMINI_API_KEY")
+
+
 if API_KEY:
     genai.configure(api_key=API_KEY)
     print("Gemini API key configured successfully.")
@@ -34,12 +34,20 @@ def extract_video_id(url: str) -> str:
     return query.get("v", [None])[0]
 
 
+
 def fetch_transcript(video_id: str) -> str:
     yt_api = YouTubeTranscriptApi()  # instantiate the class
     transcript = yt_api.fetch(video_id, languages=["en"])
     transcript_text = " ".join([snippet.text for snippet in transcript])
     print(f"Fetched transcript for video ID {video_id}: {transcript_text[:100]}...")  # Log first 100 characters
     return transcript_text
+
+
+
+
+
+
+
 
 
 def ask_question_to_gemini(transcript: str, question: str) -> str:
@@ -66,4 +74,21 @@ Your responsibilities:
     response = model.generate_content(prompt)
     return response.text
 
+
+def ask_question_from_youtube(video_url: str, question: str) -> str:
+    SYSTEM_PROMPT = """
+You are YT-Sage, an AI assistant that analyzes YouTube videos.
+
+Rules:
+1. Use the Youtube video link provided get the transcript from this video and understand the content.
+2. Only answer questions that are relevant to the video transcript.
+3. If irrelevant, say: "YT-Sage cannot answer this question as it is not relevant to the content of this video."
+4. Be simple, clear, and accurate. No hallucinations.
+"""
+
+    model = genai.GenerativeModel("gemini-2.0-flash")  # Pro supports multimodal better than flash
+    prompt = f"{SYSTEM_PROMPT}\n\nVideo Url: {video_url}\n\nQuestion: {question}"
+
+    response = model.generate_content(prompt)
+    return response.text
 
