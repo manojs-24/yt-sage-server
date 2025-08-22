@@ -23,7 +23,7 @@ def handle_youtube_analysis(payload: YouTubeAnalysisRequest):
     try:
         video_id = extract_video_id(url_string)
         transcript = fetch_transcript(video_id)
-        print(f"Transcript for video ID {video_id}: {transcript}")
+        # print(f"Transcript for video ID {video_id}: {transcript}")
         word_count = len(transcript.split())
         print(f"Transcript word count for video ID {video_id}: {word_count}")
         if word_count > MAX_TRANSCRIPT_WORDS:
@@ -57,18 +57,23 @@ def handle_youtube_analysis(payload: YouTubeAnalysisRequest):
             error="VideoUnavailable",
             timestamp=datetime.utcnow()
         ).to_response()
-    except CouldNotRetrieveTranscript:
+    except CouldNotRetrieveTranscript as e:
+        print(f"[DEBUG] CouldNotRetrieveTranscript for video: {video_id}, error: {str(e)}")
         return ErrorResponse(
             message="Could not retrieve the transcript due to an unknown error.",
             error="CouldNotRetrieveTranscript",
             timestamp=datetime.utcnow()
         ).to_response()
     except Exception as e:
+        import traceback
+        print(f"[DEBUG] Unexpected error for video: {video_id}, error: {str(e)}")
+        print("[DEBUG] Traceback:", traceback.format_exc())
         return ErrorResponse(
             message="Failed to analyse video.",
             error=str(e),
             timestamp=datetime.utcnow()
         ).to_response()
+
 
 def handle_youtube_analysis2(payload: YouTubeAnalysisRequest):
     url_string = str(payload.url)
