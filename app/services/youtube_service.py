@@ -52,7 +52,7 @@ def fetch_transcript_supadata(video_id: str) -> str:
             raise ValueError("Transcript content is empty or unavailable")
 
         transcript_text = response.content
-        print(f"[DEBUG] Fetched transcript for {video_id}: {transcript_text}")
+        # print(f"[DEBUG] Fetched transcript for {video_id}: {transcript_text}")
 
         return transcript_text
 

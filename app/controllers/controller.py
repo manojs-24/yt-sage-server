@@ -23,7 +23,7 @@ def handle_youtube_analysis(payload: YouTubeAnalysisRequest):
     try:
         video_id = extract_video_id(url_string)
         transcript = fetch_transcript_supadata(video_id)
-        print(f"Transcript for video ID {video_id}: {transcript}")
+        # print(f"Transcript for video ID {video_id}: {transcript}")
         word_count = len(transcript.split())
         print(f"Transcript word count for video ID {video_id}: {word_count}")
         if word_count > MAX_TRANSCRIPT_WORDS:
