@@ -1,6 +1,6 @@
 from app.schemas import SuccessResponse, ErrorResponse, YouTubeAnalysisRequest
 from app.utils.validations import is_valid_youtube_url
-from app.services.youtube_service import extract_video_id, fetch_transcript, ask_question_to_gemini, ask_question_from_youtube
+from app.services.youtube_service import extract_video_id, fetch_transcript, fetch_transcript_supadata, ask_question_to_gemini, ask_question_from_youtube
 from youtube_transcript_api._errors import (
     TranscriptsDisabled, NoTranscriptFound, VideoUnavailable, CouldNotRetrieveTranscript
 )
@@ -22,8 +22,8 @@ def handle_youtube_analysis(payload: YouTubeAnalysisRequest):
 
     try:
         video_id = extract_video_id(url_string)
-        transcript = fetch_transcript(video_id)
-        # print(f"Transcript for video ID {video_id}: {transcript}")
+        transcript = fetch_transcript_supadata(video_id)
+        print(f"Transcript for video ID {video_id}: {transcript}")
         word_count = len(transcript.split())
         print(f"Transcript word count for video ID {video_id}: {word_count}")
         if word_count > MAX_TRANSCRIPT_WORDS:

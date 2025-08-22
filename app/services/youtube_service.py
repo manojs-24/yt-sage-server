@@ -2,7 +2,7 @@ from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, No
 from urllib.parse import urlparse, parse_qs
 import google.generativeai as genai  # Corrected import
 import os
-import requests
+from supadata import Supadata
 
 
 
@@ -12,6 +12,7 @@ load_dotenv()
 
 
 API_KEY = os.getenv("GEMINI_API_KEY")
+SUPADATA_KEY = os.getenv("SUPADATA_KEY")
 
 
 if API_KEY:
@@ -20,7 +21,7 @@ if API_KEY:
 else:
     print("Gemini API key not found. Please set the GEMINI_API_KEY environment variable.")
 
-
+supadata = Supadata(api_key=SUPADATA_KEY)
 
 
 def extract_video_id(url: str) -> str:
@@ -43,9 +44,21 @@ def fetch_transcript(video_id: str) -> str:
     return transcript_text
 
 
+def fetch_transcript_supadata(video_id: str) -> str:
+    try:
+        response = supadata.youtube.transcript(video_id=video_id, text=True)
+        
+        if not response or not hasattr(response, "content") or not response.content:
+            raise ValueError("Transcript content is empty or unavailable")
 
+        transcript_text = response.content
+        print(f"[DEBUG] Fetched transcript for {video_id}: {transcript_text}")
 
+        return transcript_text
 
+    except Exception as e:
+        print(f"[DEBUG] Supadata transcript fetch failed for {video_id}: {str(e)}")
+        raise RuntimeError(f"Failed to fetch transcript: {str(e)}")
 
 
 
